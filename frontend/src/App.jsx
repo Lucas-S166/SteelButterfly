@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
+import Loader from "./components/loader/loader";
+import "./App.css";
 
 function App() {
   const [lineData, setLineData] = useState(null);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     async function fetchData() {
@@ -19,13 +21,11 @@ function App() {
     fetchData();
   }, [API_URL]);
 
-  if (!lineData) {
-    return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading chart...</div>;
-  }
+  if (!lineData) return <Loader />;
 
   const options = {
     title: {
-      text: "Basic ECharts Line (FastAPI-powered)",
+      text: "Basic ECharts Line",
     },
     tooltip: {
       trigger: "axis",
