@@ -8,7 +8,7 @@ const ClimateImpactAdjuster = () => {
     Uncertainties: false,
   });
 
-  const [discount, setDiscount] = useState("2"); // default 2%
+  const [discount, setDiscount] = useState("2");
 
   const toggleImpact = (key) => {
     setImpacts((prev) => ({

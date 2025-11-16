@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ClimateImpactAdjuster from "./components/ClimateImpactAdjuster";
-import FuturesWidget from "./components/FuturesWidget";
+import FuturesWidget from "./components/FuturesWidget/FuturesWidget";
 import Header from "./components/header/Header";
 import ModelInformation from "./components/ModelInformation";
 import PurchasingMethodPanel from "./components/PurchaseMethodPanel";
