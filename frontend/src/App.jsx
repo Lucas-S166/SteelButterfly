@@ -59,7 +59,12 @@ const App = () => {
           }}
         >
           <div>
-            <FuturesWidget />
+            <FuturesWidget
+              impacts={impacts}
+              secondaryImpacts={secondaryImpacts}
+              discount={discount}
+            />
+
             <div style={{ marginTop: "16px" }}>
               <ClimateImpactAdjuster
                 impacts={impacts}

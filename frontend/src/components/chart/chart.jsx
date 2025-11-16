@@ -1,13 +1,24 @@
 import { createChart, LineSeries } from "lightweight-charts";
 import { useEffect, useRef } from "react";
 
-const REGION_COLORS = {
+const REGION_COLORS_BASE = {
   china: "#FF1744",
   usa: "#2962FF",
   india: "#00C853",
 };
 
-const Chart = ({ data, regions = [], height = 400 }) => {
+const REGION_COLORS_ADJUSTED = {
+  china: "#FF8A80",  // lighter red
+  usa: "#82B1FF",    // lighter blue
+  india: "#B9F6CA",  // lighter green
+};
+
+const Chart = ({
+  baseData = [],
+  adjustedData = [],
+  regions = [],
+  height = 400,
+}) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRefs = useRef([]); // array of series
@@ -68,39 +79,62 @@ const Chart = ({ data, regions = [], height = 400 }) => {
     };
   }, [height]);
 
-  // Create / sync series + set their data whenever `data` or `regions` change
+  // Create / sync series + set their data whenever data or regions change
   useEffect(() => {
     const chart = chartRef.current;
-    if (!chart || !Array.isArray(data)) return;
+    if (!chart) return;
 
-    const datasets = data.filter(Array.isArray); // ensure only arrays
+    const baseDatasets = Array.isArray(baseData)
+      ? baseData.filter(Array.isArray)
+      : [];
+    const adjustedDatasets = Array.isArray(adjustedData)
+      ? adjustedData.filter(Array.isArray)
+      : [];
 
-    // 🔴 IMPORTANT: clear all old series and recreate them
+    // Clear all old series and recreate them
     seriesRefs.current.forEach((series) => {
       chart.removeSeries(series);
     });
     seriesRefs.current = [];
 
-    // Recreate one series per dataset, matching index to regions
-    datasets.forEach((dataset, i) => {
-      const regionName = regions[i]?.toLowerCase?.();
-      const color =
-        (regionName && REGION_COLORS[regionName]);
+    regions.forEach((regionId, index) => {
+      const regionName = regionId?.toLowerCase?.();
+      const baseSeriesData = baseDatasets[index] || [];
+      const adjustedSeriesData = adjustedDatasets[index] || [];
 
-      const series = chart.addSeries(LineSeries, {
-        lineWidth: 2,
-        color, // correct option
-      });
+      // Base series
+      if (baseSeriesData.length > 0) {
+        const baseColor =
+          (regionName && REGION_COLORS_BASE[regionName]) || "#ffffff";
 
-      if (Array.isArray(dataset)) {
-        series.setData(dataset);
+        const baseSeries = chart.addSeries(LineSeries, {
+          lineWidth: 2,
+          color: baseColor,
+        });
+
+        baseSeries.setData(baseSeriesData);
+        seriesRefs.current.push(baseSeries);
       }
 
-      seriesRefs.current.push(series);
+      // Adjusted series
+      if (adjustedSeriesData.length > 0) {
+        const adjustedColor =
+          (regionName && REGION_COLORS_ADJUSTED[regionName]) || "#bbbbbb";
+
+        const adjSeries = chart.addSeries(LineSeries, {
+          lineWidth: 2,
+          color: adjustedColor,
+        });
+
+        adjSeries.setData(adjustedSeriesData);
+        seriesRefs.current.push(adjSeries);
+      }
     });
 
-    chart.timeScale().fitContent();
-  }, [data, regions]);
+    if (seriesRefs.current.length > 0) {
+      chart.timeScale().fitContent();
+    }
+  }, [baseData, adjustedData, regions]);
 
   return <div ref={chartContainerRef} style={{ width: "100%", height }} />;
 };
