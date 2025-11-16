@@ -148,7 +148,6 @@ const FuturesWidget = () => {
               boxShadow: "0 8px 20px rgba(0, 0, 0, 0.5)",
               minWidth: "190px",
               zIndex: 10,
-              overflow: "hidden",
             }}
           >
             <MenuItem
@@ -167,36 +166,82 @@ const FuturesWidget = () => {
         {/* Content area depends on selected view */}
         {view === "prices" && (
           <>
-            <div
-              style={{
-                display: "flex",
-                gap: "16px",
-                marginBottom: "20px",
-              }}
-            >
+          <div
+            style={{
+              display: "flex",
+              gap: "16px",
+              marginBottom: "20px",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <span
+                style={{
+                  color: "#e5e7eb",
+                  fontSize: "17px",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: "800",
+                }}
+              >
+                Country:
+              </span>
+
               <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                style={{ padding: "8px" }}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid #1f2937",
+                  backgroundColor: "#020617",
+                  color: "#e5e7eb",
+                  fontSize: "15px",
+                  fontFamily: "Inter, sans-serif",
+                  cursor: "pointer",
+                  boxSizing: "border-box",
+                }}
               >
-                <option value="china">China</option>
-                <option value="usa">USA</option>
-                <option value="india">India</option>
+                <option value="china">🇨🇳 China</option>
+                <option value="usa">🇺🇸 USA</option>
+                <option value="india">🇮🇳 India</option>
               </select>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <span
+                style={{
+                  color: "#e5e7eb",
+                  fontSize: "17px",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: "800",
+                }}
+              >
+                Months Out:
+              </span>
 
               <select
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
-                style={{ padding: "8px" }}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid #1f2937",
+                  backgroundColor: "#020617",
+                  color: "#e5e7eb",
+                  fontSize: "15px",
+                  fontFamily: "Inter, sans-serif",
+                  cursor: "pointer",
+                  boxSizing: "border-box",
+                }}
               >
                 {Array.from({ length: 15 }, (_, i) => (
                   <option key={i + 1} value={i + 1}>
-                    Month {i + 1}
+                    {i + 1}
                   </option>
                 ))}
               </select>
             </div>
-
+          </div>
             <Chart data={chartData} height={300} />
           </>
         )}

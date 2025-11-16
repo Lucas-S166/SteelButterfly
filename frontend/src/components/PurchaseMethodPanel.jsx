@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SpotPurchasing from "./PurchaseMethods/SpotPurchasing";
 
 const PURCHASING_METHODS = [
   "Spot Purchasing",
@@ -11,6 +12,40 @@ const PURCHASING_METHODS = [
 
 const PurchasingMethodPanel = () => {
   const [method, setMethod] = useState(PURCHASING_METHODS[0]);
+  const renderMethodComponent = () => {
+    switch (method) {
+      case "Spot Purchasing":
+        return <SpotPurchasing />;
+
+      case "Volume-Commit":
+        return <div style={{ marginTop: "20px", color: "#94a3b8" }}>
+          Volume-Commit component placeholder
+        </div>;
+
+      case "Fixed Spread Contracts":
+        return <div style={{ marginTop: "20px", color: "#94a3b8" }}>
+          Fixed Spread Contracts placeholder
+        </div>;
+
+      case "Futures":
+        return <div style={{ marginTop: "20px", color: "#94a3b8" }}>
+          Futures placeholder
+        </div>;
+
+      case "Swaps":
+        return <div style={{ marginTop: "20px", color: "#94a3b8" }}>
+          Swaps placeholder
+        </div>;
+
+      case "Options":
+        return <div style={{ marginTop: "20px", color: "#94a3b8" }}>
+          Options placeholder
+        </div>;
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div
@@ -26,7 +61,7 @@ const PurchasingMethodPanel = () => {
     >
       <div
         style={{
-          width: "100%",             // row = full panel width
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: "16px",
@@ -40,12 +75,13 @@ const PurchasingMethodPanel = () => {
         >
           Purchase Method
         </h2>
+
         <select
           id="purchasing-method-select"
           value={method}
           onChange={(e) => setMethod(e.target.value)}
           style={{
-            flex: 1,                  // ⬅️ take the rest of the row
+            flex: 1,
             padding: "10px 14px",
             borderRadius: "10px",
             border: "1px solid #1f2937",
@@ -63,7 +99,12 @@ const PurchasingMethodPanel = () => {
             </option>
           ))}
         </select>
-        </div>
+      </div>
+
+      {/* Render the method-specific UI BELOW the selector */}
+      <div style={{ marginTop: "24px" }}>
+        {renderMethodComponent()}
+      </div>
     </div>
   );
 };

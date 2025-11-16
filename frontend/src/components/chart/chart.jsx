@@ -1,13 +1,11 @@
-// Chart.jsx
-import React, { useEffect, useRef } from "react";
 import { createChart, LineSeries } from "lightweight-charts";
+import { useEffect, useRef } from "react";
 
 const Chart = ({ data, height = 400 }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
 
-  // Initialize chart once
   useEffect(() => {
     const container = chartContainerRef.current;
     if (!container) return;
@@ -16,18 +14,25 @@ const Chart = ({ data, height = 400 }) => {
       width: container.clientWidth,
       height,
       layout: {
-        background: { type: "solid", color: "#ffffff" },
-        textColor: "#333333",
+        background: { type: "solid", color: "#000000" },
+        textColor: "#e6e6e6",
       },
       grid: {
-        vertLines: { color: "#eeeeee" },
-        horzLines: { color: "#eeeeee" },
+        vertLines: { color: "rgba(255, 255, 255, 0.1)" },
+        horzLines: { color: "rgba(255, 255, 255, 0.1)" },
+      },
+      leftPriceScale: {
+        visible: true,
+        borderColor: "#cccccc",
       },
       rightPriceScale: {
-        borderColor: "#cccccc",
+        visible: false,
       },
       timeScale: {
-        borderColor: "#cccccc",
+        borderColor: "rgba(255, 255, 255, 0.2)",
+      },
+      watermark: {
+        visible: false,
       },
     });
 
@@ -62,7 +67,7 @@ const Chart = ({ data, height = 400 }) => {
         seriesRef.current = null;
       }
     };
-  }, [height]); // height affects chart init
+  }, [data, height]); // height affects chart init
 
   // Update data when `data` changes
   useEffect(() => {
