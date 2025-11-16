@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ClimateImpactAdjuster from "./components/ClimateImpactAdjuster";
+import ClimateImpactAdjuster from "./components/ClimateImpactAdjuster/ClimateImpactAdjuster";
 import FuturesWidget from "./components/FuturesWidget/FuturesWidget";
 import Header from "./components/header/Header";
 import ModelInformation from "./components/ModelInformation";
@@ -9,11 +9,45 @@ import TabBar from "./components/TabBar";
 const App = () => {
   const [activeTab, setActiveTab] = useState("visualizer");
 
+  // 🔹 Primary impacts (SCC, SO2, Water)
+  const [impacts, setImpacts] = useState({
+    scc: false,
+    so2: false,
+    water: false,
+  });
+
+  // 🔹 Secondary impacts (uncertainties, tax incentives, tariffs)
+  const [secondaryImpacts, setSecondaryImpacts] = useState({
+    uncertainties: false,
+    taxIncentives: false,
+    tariffs: false,
+  });
+
+  // 🔹 Discount rate
+  const [discount, setDiscount] = useState("2");
+
+  const handleToggleImpact = (key) => {
+    setImpacts((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handleToggleSecondaryImpact = (key) => {
+    setSecondaryImpacts((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handleDiscountChange = (value) => {
+    setDiscount(value);
+  };
+
   return (
     <>
-      <Header />
       <TabBar activeTab={activeTab} onChange={setActiveTab} />
-      
+
       {activeTab === "visualizer" && (
         <div
           style={{
@@ -26,10 +60,18 @@ const App = () => {
         >
           <div>
             <FuturesWidget />
-            <div>
-              <ClimateImpactAdjuster />
+            <div style={{ marginTop: "16px" }}>
+              <ClimateImpactAdjuster
+                impacts={impacts}
+                secondaryImpacts={secondaryImpacts}
+                discount={discount}
+                onToggleImpact={handleToggleImpact}
+                onToggleSecondaryImpact={handleToggleSecondaryImpact}
+                onDiscountChange={handleDiscountChange}
+              />
             </div>
           </div>
+
           <div>
             <PurchasingMethodPanel />
           </div>
