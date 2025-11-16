@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from xlsx_parser import xlsx_parser
 
 app = FastAPI()
 
@@ -10,9 +11,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/line")
-def get_line_data():
-    return {
-        "x": [1, 2, 3, 4, 5],
-        "y": [10, 9, 7, 5, 3]
-    }
+@app.get("/prices")
+def get_prices(month: int, filename: str):
+    return xlsx_parser(filename, month)
