@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640">
+  <rect width="100%" height="100%" fill="white" />
+  <style>
+    text { font-family: "Times New Roman", "Times", serif; fill: #111; }
+    .equation { font-size: 32px; }
+    .definition { font-size: 22px; }
+  </style>
+  <text x="40" y="90" class="equation">P' = [ P + SC<tspan baseline-shift="sub" font-size="16px">CO₂</tspan> ( M<tspan baseline-shift="sub" font-size="16px">CO₂</tspan> + T<tspan baseline-shift="sub" font-size="16px">CO₂</tspan> ) + ( D<tspan baseline-shift="sub" font-size="16px">PM</tspan> / E<tspan baseline-shift="sub" font-size="16px">SO₂</tspan> · Y · f<tspan baseline-shift="sub" font-size="16px">sulf</tspan> ) M<tspan baseline-shift="sub" font-size="16px">SO₂</tspan> + C<tspan baseline-shift="sub" font-size="16px">0</tspan> ( 1 + β S ) W ]</text>
+  <text x="40" y="150" class="definition">P' = Climate Adjusted HRC Price</text>
+  <text x="40" y="185" class="definition">P = Original HRC Price</text>
+  <text x="40" y="220" class="definition">SC<tspan baseline-shift="sub" font-size="16px">CO₂</tspan> = Social cost of CO₂ (given discount rate)</text>
+  <text x="40" y="255" class="definition">M<tspan baseline-shift="sub" font-size="16px">CO₂</tspan> = CO₂ Emissions from Manufacturing per Mill</text>
+  <text x="40" y="290" class="definition">T<tspan baseline-shift="sub" font-size="16px">CO₂</tspan> = CO₂ Emissions from Transportation per Region</text>
+  <text x="40" y="325" class="definition">D<tspan baseline-shift="sub" font-size="16px">PM</tspan> = Total Monetized Particulate Matter (PM) Damages for Region in a year</text>
+  <text x="40" y="360" class="definition">E<tspan baseline-shift="sub" font-size="16px">SO₂</tspan> = SO₂ Total Emissions per Region in a year</text>
+  <text x="40" y="395" class="definition">Y = Mass Yield (Sulfate-PM per Ton SO₂)</text>
+  <text x="40" y="430" class="definition">f<tspan baseline-shift="sub" font-size="16px">sulf</tspan> = Fraction of PM Damages Attributable to Sulfate</text>
+  <text x="40" y="465" class="definition">M<tspan baseline-shift="sub" font-size="16px">SO₂</tspan> = SO₂ Emissions from Manufacturing per Mill</text>
+  <text x="40" y="500" class="definition">C<tspan baseline-shift="sub" font-size="16px">0</tspan> = Base cost of water (e.g., $1/m³)</text>
+  <text x="40" y="535" class="definition">β = Scarcity Sensitivity parameter</text>
+  <text x="40" y="570" class="definition">S = Water Scarcity Indicator (0–1)</text>
+  <text x="40" y="605" class="definition">W = Water Usage in Steel Manufacturing Per Mill</text>
+</svg>

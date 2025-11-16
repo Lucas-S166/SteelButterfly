@@ -1,0 +1,92 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{mhchem}
+\date{}
+
+\title{Steel Butterfly Climate Impact Adjusted HRC Price Visualization Tool}
+
+\begin{document}
+
+\maketitle
+
+\section{The Need}
+
+\begin{itemize}
+    \item Steel industry supply chains have massive impacts on the environment, and upstream pricing conversations rarely make those damages explicit.
+    \item The stock price of HRC steel is not just what you see traded---it is imperative we factor in the cost this product has on our environment, water, air, and public health.
+    \item \ce{SO2} emissions oxidize into sulfate aerosols (PM$_{2.5}$) that can drive lung disease, smog events, and secondary climate forcing, so we explicitly quantify them in the model.
+\end{itemize}
+
+\section{Climate Impact Adjusted Price}
+
+Here is the equation we use to calculate our climate impact adjusted price. It factors in $\mathrm{CO_2}$ emissions from both manufacturing and transporting steel, and well as $\mathrm{SO_2}$ emissions and water usage during steel production.
+
+\[
+P^{'} =
+\left[
+    P
+    + SC_{\mathrm{CO_2}}\,\big( M_{\mathrm{CO_2}} + T_{\mathrm{CO_2}} \big)
+    + \left( \frac{D_{\mathrm{PM}}}{E_{\mathrm{SO_2}}} \cdot Y \cdot f_{\mathrm{sulf}} \right)
+      M_{\mathrm{SO_2}}
+    + C_{0}\,\big( 1 + \beta S \big)\, W
+\right]
+\]
+
+\begin{align*}
+    P^{'} &=  \text{Climate Adjusted HRC Price} \\
+    P &= \text{Original HRC price} \\
+    SC_{\mathrm{CO_2}} &= \text{Social cost of CO}_{2} \text{ (given discount rate)} \\
+    M_{\mathrm{CO_2}} &= \text{CO}_{2} \text{ emissions from manufacturing per mill} \\
+    T_{\mathrm{CO_2}} &= \text{CO}_{2} \text{ emissions from transportation per region} \\
+    D_{\mathrm{PM}} &= \text{Total monetized particulate matter damages for region per year} \\
+    E_{\mathrm{SO_2}} &= \text{SO}_{2} \text{ total emissions per region per year} \\
+    Y &= \text{Mass yield (sulfate-PM per ton SO}_{2}\text{)} \\
+    f_{\mathrm{sulf}} &= \text{Fraction of PM damages attributable to sulfate} \\
+    M_{\mathrm{SO_2}} &= \text{SO}_{2} \text{ emissions from manufacturing per mill} \\
+    C_{0} &= \text{Base cost of water (e.g., \$1/m}^3\text{)} \\
+    \beta &= \text{Scarcity sensitivity parameter} \\
+    S &= \text{Water scarcity indicator (0--1)} \\
+    W &= \text{Water usage in steel manufacturing per mill}
+\end{align*}
+
+This is the exact formulation implemented in the backend service (\texttt{backend/pricing.py}) so the UI can toggle each damage component on or off when estimating an adjusted per-ton price.
+
+\subsection{Social Cost of Carbon Dioxide Emissions}
+
+The social-cost-of-carbon (SCC) term multiplies an externally supplied SCC schedule $SC_{\mathrm{CO_2}}$ by the mill's total greenhouse-gas footprint $M_{\mathrm{CO_2}} + T_{\mathrm{CO_2}}$. In the client, the discount-rate selector (1.5--3\%) is tied to the SCC lookup so that users can align with the 2022 Interagency Working Group values while also exploring sensitivity to alternative rates. When SCC is toggled off, the backend simply zeros out this contribution, enabling transparent A/B comparisons of carbon-aware procurement.
+
+\subsection{Social Cost of Sulfur Dioxide Emissions}
+
+Sulfur dioxide (mislabelled as ``silicon dioxide'' in earlier drafts) is priced using a damage-function cascade. The ratio $D_{\mathrm{PM}} / E_{\mathrm{SO_2}}$ converts aggregate particulate damages to an SO$_2$ damage-per-ton factor, $Y$ handles the chemical yield from SO$_2$ to sulfate aerosols, and $f_{\mathrm{sulf}}$ isolates the sulfate-specific share of PM externalities. Multiplying by mill-level $M_{\mathrm{SO_2}}$ produces a monetized penalty that captures respiratory and deposition harms attributable to sulfur in the steelmaking chain.
+
+\subsection{Social Cost of Water Usage}
+
+Water impacts are modeled as a base volumetric charge $C_0 W$ that is scaled by regional scarcity $(1 + \beta S)$. This keeps the units intuitive (dollars per cubic meter) while letting procurement teams stress-test how drought or aquifer depletion ($S \rightarrow 1$) magnifies the hidden cost of water-intensive electric-arc furnace operations.
+
+\section{Steel Purchasing Methods}
+
+We mirror the application's three interactive calculators so procurement teams can benchmark exposure across contract types:
+
+\begin{itemize}
+    \item \textbf{Spot / Volume-Commit}: A direct multiplication of entered spot price and committed tonnage (\texttt{SpotVolume.jsx}) provides an instant total cash outlay with support for extremely large tonnages via scientific-notation formatting.
+    \item \textbf{Long Future}: The futures module (\texttt{LongFuture.jsx}) tracks entry notional, settlement notional, and mark-to-market P\&L based on the difference between entry and settlement prices multiplied by tonnage.
+    \item \textbf{Long Call}: The options module (\texttt{LongCall.jsx}) collects strike, premium, quantity, and expected expiry price to compute total premium paid, payoff, net profit/loss, and breakeven per ton, mirroring the payoff diagram of a vanilla call.
+\end{itemize}
+
+\section{How We Got Our Data}
+
+Historical hot-rolled coil (HRC) curves are provided as region-specific workbooks (\texttt{HC Closing Prices.xlsx} for China, \texttt{SI Closing Prices.xlsx} for India, and \texttt{HU Closing Prices.xlsx} for the United States). The FastAPI backend lazily loads each workbook with \texttt{pandas}, caches the resulting DataFrame (\texttt{xlsx\_parser.py}), and exposes a single \texttt{/prices} endpoint that the React widget calls to render multi-country overlays in the lightweight-charts visualization. The raw price files originate from London Metal Exchange CSV exports that we converted to XLSX for ease of deployment; because the LME feed is not publicly queryable in real time, we currently ship the static extracts alongside the app.
+
+\section{Future Work}
+
+\begin{itemize}
+    \item We assume the social cost of carbon has stayed constant since 2022 and that the current discount rate is 3\%. In future iterations we want to regenerate the SCC surface each quarter as new Integrated Assessment Model runs become available.
+    \item If we had more time we would incorporate complex climate modeling software with updated data; unfortunately those simulations take more than a day to run on commodity hardware.
+    \item The HRC regional market rate is currently assumed to match the company manufacturing rate. This must remain approximately true for companies to stay competitive, but future models should introduce explicit regional basis differentials.
+    \item We are not yet able to get live stock market or futures prices because most APIs with sufficient depth require paid entitlements. Our present data is downloaded CSV from the LME; with more time and budget we could license a streaming feed and remove the manual refresh.
+    \item Water pricing is captured through a simple scarcity multiplier derived from available water-risk scores per region; incorporating basin-scale hydrologic models would significantly improve accuracy.
+    \item Likewise, the SO$_2$ social-cost block still relies on a lightweight, in-house model calibrated to 2018 epidemiological research. Funding a formal update with current concentration-response functions would reduce uncertainty bands.
+\end{itemize}
+
+\end{document}
