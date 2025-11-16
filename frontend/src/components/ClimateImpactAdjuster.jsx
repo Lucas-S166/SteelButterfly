@@ -1,17 +1,29 @@
 import { useState } from "react";
+import { useClimateImpacts } from "../context/ClimateImpactContext";
+
+const IMPACT_OPTIONS = [
+  { key: "scc", label: "SCC" },
+  { key: "so2", label: "SC_SO2" },
+  { key: "water", label: "Water" },
+];
+
+const SECONDARY_OPTIONS = [
+  { key: "uncertainties", label: "Uncertainties" },
+  { key: "taxIncentives", label: "Tax Incentives" },
+  { key: "tariffs", label: "Tariffs" },
+];
 
 const ClimateImpactAdjuster = () => {
-  const [impacts, setImpacts] = useState({
-    SCC: false,
-    SCSO_2: false,
-    Water: false,
-    Uncertainties: false,
+  const { impacts, toggleImpact } = useClimateImpacts();
+  const [discount, setDiscount] = useState("2");
+  const [secondaryImpacts, setSecondaryImpacts] = useState({
+    uncertainties: false,
+    taxIncentives: false,
+    tariffs: false,
   });
 
-  const [discount, setDiscount] = useState("2");
-
-  const toggleImpact = (key) => {
-    setImpacts((prev) => ({
+  const handleSecondaryToggle = (key) => {
+    setSecondaryImpacts((prev) => ({
       ...prev,
       [key]: !prev[key],
     }));
@@ -49,7 +61,7 @@ const ClimateImpactAdjuster = () => {
           marginBottom: "18px",
         }}
       >
-        {["SCC", "SCSO_2", "Water", "Uncertainties"].map((key) => (
+        {IMPACT_OPTIONS.map(({ key, label }) => (
           <label
             key={key}
             style={{
@@ -66,7 +78,27 @@ const ClimateImpactAdjuster = () => {
               onChange={() => toggleImpact(key)}
               style={{ cursor: "pointer" }}
             />
-            {key}
+            {label}
+          </label>
+        ))}
+        {SECONDARY_OPTIONS.map(({ key, label }) => (
+          <label
+            key={key}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              fontSize: "14px",
+              cursor: "pointer",
+              gap: "6px",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={secondaryImpacts[key]}
+              onChange={() => handleSecondaryToggle(key)}
+              style={{ cursor: "pointer" }}
+            />
+            {label}
           </label>
         ))}
       </div>

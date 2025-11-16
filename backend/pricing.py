@@ -3,6 +3,85 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 from contextlib import asynccontextmanager
 import math
+import re
+from typing import Dict, Optional
+
+
+_COMPONENT_ALIAS_MAP = {
+    "scc": "scc",
+    "scco2": "scc",
+    "sc-co2": "scc",
+    "co2": "scc",
+    "socialcostcarbon": "scc",
+    "scso2": "so2",
+    "so2": "so2",
+    "sulfur": "so2",
+    "water": "water",
+    "waterscarcity": "water",
+}
+
+_DEFAULT_COMPONENT_FLAGS = {"scc": True, "so2": True, "water": True}
+
+
+def _normalize_component_key(raw_key: str) -> Optional[str]:
+    """
+    Map arbitrary checkbox labels (SCC, SC_CO2, SCSO_2, etc.) to canonical keys.
+    """
+    if raw_key is None:
+        return None
+    normalized = re.sub(r"[^a-z0-9]", "", raw_key.lower())
+    return _COMPONENT_ALIAS_MAP.get(normalized)
+
+
+def _resolve_component_flags(flags: Optional[Dict[str, bool]]) -> Dict[str, bool]:
+    """
+    Merge user-provided component toggles with defaults so downstream math can
+    rely on a complete dict.
+    """
+    resolved = _DEFAULT_COMPONENT_FLAGS.copy()
+    if not flags:
+        return resolved
+
+    for raw_key, value in flags.items():
+        canonical_key = _normalize_component_key(raw_key)
+        if canonical_key:
+            resolved[canonical_key] = bool(value)
+
+    return resolved
+
+
+def _compute_component_costs(
+    SC_CO2,
+    M_CO2,
+    T_CO2,
+    D_PM,
+    E_SO2,
+    Y,
+    f_sulf,
+    M_SO2,
+    C0,
+    beta,
+    S,
+    W,
+    component_flags: Dict[str, bool],
+) -> Dict[str, float]:
+    """
+    Returns the monetary impact of each individual climate component. Any
+    component toggled off will return 0 so the caller can simply sum values.
+    """
+    components = {"scc": 0.0, "so2": 0.0, "water": 0.0}
+
+    if component_flags["scc"]:
+        components["scc"] = SC_CO2 * (M_CO2 + T_CO2)
+
+    if component_flags["so2"]:
+        so2_cost_per_ton = (D_PM / E_SO2) * (Y) * (f_sulf)
+        components["so2"] = so2_cost_per_ton * M_SO2
+
+    if component_flags["water"]:
+        components["water"] = C0 * (1 + beta * S) * W
+
+    return components
 
 def climate_adjusted_price(
     P_orig,
@@ -17,106 +96,34 @@ def climate_adjusted_price(
     C0,
     beta,
     S,
-    W):
+    W,
+    *,
+    component_flags: Optional[Dict[str, bool]] = None,
+    return_breakdown: bool = False,
+):
     """
     Computes the climate-adjusted price using your full formula.
     """
 
-    # --- Social cost of CO2 component ---
-    co2_component = SC_CO2 * (M_CO2 + T_CO2)
-
-    # --- SO2 damages component ---
-    so2_cost_per_ton = (D_PM / E_SO2) * (Y / f_sulf)
-    so2_component = so2_cost_per_ton * M_SO2
-
-    # --- Water scarcity cost component ---
-    water_component = C0 * (1 + beta * S) * W
-
-    # --- Final adjusted price ---
-    adjusted_price = (
-        P_orig
-        + co2_component
-        + so2_component
-        + water_component
-    )
-
-    return adjusted_price
-
-
-
-def climate_adjuster_with_uncertainties(
-    P_orig,
-    SC_CO2, SC_CO2_unc,
-    M_CO2, M_CO2_unc,
-    T_CO2, T_CO2_unc, 
-    D_PM,
-    E_SO2,
-    Y,
-    f_sulf,
-    M_SO2, SO2_unc,
-    C0,
-    beta,
-    S,
-    W, water_unc):
-    """
-    Computes climate-adjusted price AND its uncertainty.
-    Uses Gaussian error propagation.
-    """
-    # 1. Compute the base price (no uncertainties)
-    base_price = climate_adjusted_price(
-        P_orig,
+    flags = _resolve_component_flags(component_flags)
+    component_costs = _compute_component_costs(
         SC_CO2,
         M_CO2,
         T_CO2,
         D_PM,
         E_SO2,
+        Y,
+        f_sulf,
         M_SO2,
+        C0,
+        beta,
         S,
-        W
+        W,
+        flags,
     )
 
-    f_sulf = 0.2 #Fraction of PM₂.₅ monetary damage attributable to sulfate
-    Y = 1.4 #Mass yield (t PM₂.₅ sulfate formed per t SO₂ emitted)
-    C0 = 1 #base cost of water 
-    beta = 9 #scarcity sensitivity parameter. Toggle beteen 4 - 15
+    adjusted_price = P_orig + sum(component_costs.values())
+    if return_breakdown:
+        return adjusted_price, component_costs
+    return adjusted_price
 
-    # 2. Error propagation for each component
-
-    #  CO2 component: SC_CO2 * (M_CO2 + T_CO2) 
-    dC_dSC = (M_CO2 + T_CO2)
-    dC_dM  = SC_CO2
-    dC_dT  = SC_CO2
-
-    co2_var = (
-        (dC_dSC**2) * (SC_CO2_unc**2) +
-        (dC_dM**2)  * (M_CO2_unc**2)  +
-        (dC_dT**2)  * (T_CO2_unc**2)
-    )
-
-
-    #  SO2 component: M_SO2 * (D_PM/E_SO2) * (Y/f_sulf) 
-    constant_SO2 = (D_PM / E_SO2) * (Y / f_sulf)
-
-    dSO2_dM = constant_SO2   # derivative wrt M_SO2
-    so2_var = (dSO2_dM**2) * (SO2_unc**2)
-
-
-    #  Water component: C0 * (1 + beta*S) * W 
-    dW_dW = C0 * (1 + beta * S)
-
-    water_var = (dW_dW**2) * (water_unc**2)
-
-    # 3. Total variance & standard deviation
-
-    total_variance = co2_var + so2_var + water_var
-    total_uncertainty = math.sqrt(total_variance)
-
-    return base_price, total_uncertainty
-
-
-
-def us_tarrifs(price):
-    return 1.25 * price
-
-def us_tax_incentive(price): 
-    return 0.90* price
