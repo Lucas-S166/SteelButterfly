@@ -75,24 +75,9 @@ const FuturesWidget = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        marginLeft: "40px", // shifted left to leave space for right panel
-        marginTop: "30px",
-        maxWidth: "650px",  // narrower so a right panel fits beside it
+        padding: "0 40px", // shifted left to leave space for right panel
       }}
     >
-      {/* Page-level title above the widget */}
-      <h1
-        style={{
-          color: "white",
-          fontFamily: "Inter, sans-serif",
-          fontSize: "24px",
-          fontWeight: "600",
-          marginBottom: "20px",
-        }}
-      >
-        HRC Prices Time Series
-      </h1>
-
       {/* Widget card */}
       <div
         style={{
@@ -111,20 +96,18 @@ const FuturesWidget = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginBottom: "16px",
           }}
         >
-          <h2
-            style={{
-              margin: 0,
-              color: "white",
-              fontFamily: "system-ui, sans-serif", // reverted to original font
-              fontSize: "20px",
-              fontWeight: "600",
-            }}
-          >
-            Futures
-          </h2>
+        <h1
+          style={{
+            color: "white",
+            fontFamily: "Inter, sans-serif",
+            fontSize: "24px",
+            fontWeight: "600",
+          }}
+        >
+          HRC Futures
+        </h1>
 
           <button
             onClick={() => setMenuOpen((open) => !open)}

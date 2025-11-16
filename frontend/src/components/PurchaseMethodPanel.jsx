@@ -1,14 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 const PURCHASING_METHODS = [
-  "Spot Purchasing (Index-Linked)",
-  "Spot Purchasing (Daily Market Buying)",
-  "Volume-Commit / Fixed Spread Physical Steel Contracts",
-  "HRC Futures",
-  "HRC Swaps",
-  "HRC Options",
-  "Call Premiums",
-  "Collars",
+  "Spot Purchasing",
+  "Volume-Commit",
+  "Fixed Spread Contracts",
+  "Futures",
+  "Swaps",
+  "Options",
 ];
 
 const PurchasingMethodPanel = () => {
@@ -24,39 +22,24 @@ const PurchasingMethodPanel = () => {
         boxSizing: "border-box",
         color: "white",
         fontFamily: "Inter, sans-serif",
-        minWidth: "520px",          // ⬅️ panel width big enough for dropdown
       }}
     >
-      <h2
-        style={{
-          margin: 0,
-          fontSize: "22px",
-          fontWeight: 700,
-        }}
-      >
-        Purchasing Method Analysis
-      </h2>
-
       <div
         style={{
-          marginTop: "22px",
           width: "100%",             // row = full panel width
           display: "flex",
           alignItems: "center",
           gap: "16px",
         }}
       >
-        <label
-          htmlFor="purchasing-method-select"
+        <h2
           style={{
-            fontSize: "16px",
-            color: "#e5e7eb",
-            whiteSpace: "nowrap",
+            fontSize: "22px",
+            fontWeight: 700,
           }}
         >
-          Method
-        </label>
-
+          Purchase Method
+        </h2>
         <select
           id="purchasing-method-select"
           value={method}
@@ -80,7 +63,7 @@ const PurchasingMethodPanel = () => {
             </option>
           ))}
         </select>
-      </div>
+        </div>
     </div>
   );
 };
