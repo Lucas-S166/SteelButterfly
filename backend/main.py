@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from xlsx_parser import xlsx_parser
+from fastapi.responses import ORJSONResponse
 
-app = FastAPI()
-
+app = FastAPI(default_response_class=ORJSONResponse)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
