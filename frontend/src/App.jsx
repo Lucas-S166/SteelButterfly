@@ -3,6 +3,9 @@ import Header from "./components/Header";
 import TabBar from "./components/TabBar";
 import FuturesWidget from "./components/FuturesWidget";
 import PurchasingMethodPanel from "./components/PurchasingMethodPanel";
+import ClimateImpactAdjuster from "./components/ClimateImpactAdjuster";
+import ModelInformation from "./components/ModelInformation";
+
 
 const App = () => {
   const [region, setRegion] = useState("china");
@@ -30,6 +33,8 @@ const App = () => {
     <>
       <Header />
       <TabBar activeTab={activeTab} onChange={setActiveTab} />
+      
+      {/* ===== HRC VISUALIZER TAB ===== */}
       {activeTab === "visualizer" && (
         <div
           style={{
@@ -41,10 +46,19 @@ const App = () => {
         >
           <div style={{ flex: "0 0 640px" }}>
             <FuturesWidget />
+            <div style={{ marginLeft: "40px" }}>
+              <ClimateImpactAdjuster />
+            </div>
           </div>
           <div style={{ flex: "0 0 360px", marginTop: "94px" }}>
             <PurchasingMethodPanel />
           </div>
+        </div>
+      )}
+      {/* ===== MODEL INFORMATION TAB ===== */}
+      {activeTab === "model" && (
+        <div style={{ padding: "32px 48px" }}>
+          <ModelInformation />
         </div>
       )}
 

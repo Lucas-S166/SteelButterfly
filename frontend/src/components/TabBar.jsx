@@ -12,8 +12,8 @@ const TabBar = ({ activeTab, onChange }) => {
       </button>
 
       <button
-        className={`tab-item ${activeTab === "info" ? "active" : ""}`}
-        onClick={() => onChange("info")}
+        className={`tab-item ${activeTab === "model" ? "active" : ""}`}
+        onClick={() => onChange("model")}
       >
         Model Information
       </button>
